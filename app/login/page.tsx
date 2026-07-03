@@ -7,17 +7,20 @@ import { useStore } from "@/lib/store";
 import { LogoMark } from "@/components/ui";
 
 export default function LoginPage() {
-  const { login, db } = useStore();
+  const { login, isLive } = useStore();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  const doLogin = (mail: string) => {
-    const r = login(mail, pass);
+  const doLogin = async (mail: string) => {
+    setBusy(true);
+    setErr("");
+    const r = await login(mail, pass);
+    setBusy(false);
     if (!r.ok) { setErr(r.message); return; }
-    const u = db.members.find(m => m.email.toLowerCase() === mail.toLowerCase());
-    router.push(u?.role === "admin" ? "/admin/lessons" : "/dashboard");
+    router.push("/"); // ロール別の振り分けはトップページで実施
   };
 
   return (
@@ -36,18 +39,20 @@ export default function LoginPage() {
           </div>
           <div className="field">
             <label>パスワード</label>
-            <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••••••" />
+            <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••••••" required={isLive} />
           </div>
-          <button className="btn btn-primary" type="submit">ログイン</button>
+          <button className="btn btn-primary" type="submit" disabled={busy}>{busy ? "確認中..." : "ログイン"}</button>
         </form>
         <Link href="/reset-password"><span className="link-sub">パスワードをお忘れの方はこちら</span></Link>
-        <div className="demo-note">
-          ― プロトタイプ用デモアカウント（パスワード不要）―<br />
-          <button className="btn btn-ghost btn-sm" onClick={() => doLogin("member@demo.jp")}>会員（花子・プレミアム）</button>
-          <button className="btn btn-ghost btn-sm" onClick={() => doLogin("sato@demo.jp")}>会員（佐藤・ベーシック）</button>
-          <button className="btn btn-gold btn-sm" onClick={() => doLogin("info@life-m-c.com")}>管理者</button>
-          <button className="btn btn-danger btn-sm" onClick={() => doLogin("tanaka@demo.jp")}>期限切れ会員</button>
-        </div>
+        {!isLive && (
+          <div className="demo-note">
+            ― プロトタイプ用デモアカウント（パスワード不要）―<br />
+            <button className="btn btn-ghost btn-sm" onClick={() => doLogin("member@demo.jp")}>会員（花子・プレミアム）</button>
+            <button className="btn btn-ghost btn-sm" onClick={() => doLogin("sato@demo.jp")}>会員（佐藤・ベーシック）</button>
+            <button className="btn btn-gold btn-sm" onClick={() => doLogin("info@life-m-c.com")}>管理者</button>
+            <button className="btn btn-danger btn-sm" onClick={() => doLogin("tanaka@demo.jp")}>期限切れ会員</button>
+          </div>
+        )}
       </div>
     </div>
   );

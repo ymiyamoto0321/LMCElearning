@@ -32,18 +32,29 @@ export default function AdminMembersPage() {
     return `${Math.round((done / lessons.length) * 100)}%`;
   };
 
-  const issue = () => {
+  const issue = async () => {
     setMsg("");
     if (!form.name.trim() || !form.email.trim()) { setMsg("氏名・メールアドレスは必須です。"); return; }
     if (form.password.length < 8) { setMsg("初期パスワードは8文字以上にしてください。"); return; }
     if (!form.planId) { setMsg("契約プランを選択してください。"); return; }
-    const r = s.addMember({
-      name: form.name.trim(), email: form.email.trim(), status: "active",
+    const name = form.name.trim();
+    const r = await s.addMember({
+      name, email: form.email.trim(), status: "active",
       planId: form.planId, expiresAt: form.expiresAt, theme: form.theme,
-    });
+    }, form.password);
     if (!r.ok) { setMsg(r.message); return; }
-    setMsg(`✅ ${form.name} さんを発行しました。ログインURL・メール・初期パスワードを本人に案内してください。`);
+    setMsg(`✅ ${name} さんを発行しました。ログインURL・メール・初期パスワードを本人に案内してください。`);
     setForm({ name: "", email: "", password: "", planId: "", expiresAt: addYears(today, 1), theme: "standard" });
+  };
+
+  const reissuePassword = async (m: Member) => {
+    const pw = prompt(`${m.name} さんの新しい仮パスワード（8文字以上）を入力してください`);
+    if (!pw) return;
+    if (pw.length < 8) { alert("仮パスワードは8文字以上にしてください。"); return; }
+    const r = await s.resetMemberPassword(m.id, pw);
+    alert(r.ok
+      ? `仮パスワードを再発行しました。本人に新しいパスワードを案内し、ログイン後の変更を推奨してください。`
+      : r.message);
   };
 
   const members = s.db.members.filter(m => m.role !== "admin");
@@ -109,7 +120,7 @@ export default function AdminMembersPage() {
                   <td>{memberRate(m)}</td>
                   <td style={{ whiteSpace: "nowrap" }}>
                     <button className="btn btn-ghost btn-sm" onClick={() => { setExpEdit(m); setExpDate(m.expiresAt); }}>期限変更</button>{" "}
-                    <button className="btn btn-ghost btn-sm" onClick={() => alert(`仮パスワードを再発行しました（プロトタイプでは実発行されません）。\nSupabase接続後: 管理者APIで仮PWを設定し、本人に別途案内します。`)}>仮PW再発行</button>{" "}
+                    <button className="btn btn-ghost btn-sm" onClick={() => reissuePassword(m)}>仮PW再発行</button>{" "}
                     <button className="btn btn-ghost btn-sm" onClick={() => s.updateMember(m.id, { status: m.status === "active" ? "suspended" : "active" })}>
                       {m.status === "active" ? "停止" : "再開"}
                     </button>{" "}

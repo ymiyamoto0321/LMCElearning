@@ -1,11 +1,18 @@
 "use client";
-// S-10 パスワード再設定（プロトタイプ: 画面フローのみ。Supabase接続時に resetPasswordForEmail を実装）
+// S-10 パスワード再設定（メール送信）
 import { useState } from "react";
 import Link from "next/link";
+import { useStore } from "@/lib/store";
 
 export default function ResetPasswordPage() {
+  const { requestPasswordReset } = useStore();
   const [sent, setSent] = useState(false);
   const [email, setEmail] = useState("");
+
+  const send = async () => {
+    await requestPasswordReset(email);
+    setSent(true); // 登録有無を推測されないよう常に「送信しました」を表示
+  };
 
   return (
     <div className="login-wrap">
@@ -15,7 +22,7 @@ export default function ResetPasswordPage() {
           <div className="tag">PASSWORD RESET</div>
         </div>
         {!sent ? (
-          <form onSubmit={e => { e.preventDefault(); setSent(true); }}>
+          <form onSubmit={e => { e.preventDefault(); send(); }}>
             <p style={{ fontSize: 13.5, color: "var(--sub)", marginBottom: 14 }}>
               ご登録のメールアドレスを入力してください。パスワード再設定用のリンクをお送りします。
             </p>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { StoreProvider } from "@/lib/store";
+import { DemoBanner } from "@/components/demo-banner";
 
 export const metadata: Metadata = {
   title: "LMC e-learning",
@@ -11,8 +12,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <body>
-        <div className="proto-note">🔧 <b>LMC e-learning プロトタイプ版</b>（データはブラウザ内に保存されます）</div>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <DemoBanner />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );
