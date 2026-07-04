@@ -11,14 +11,16 @@ export default function AdminProgressPage() {
 
   const members = s.db.members.filter(m => m.role !== "admin");
 
-  const memberLessons = (planId: string | null) => {
-    const allowed = new Set(s.db.planCourses.filter(pc => pc.planId === planId).map(pc => pc.courseId));
+  // 会員の全契約プランに紐づく公開レッスン
+  const memberLessons = (userId: string) => {
+    const planIds = new Set(s.contractsOf(userId).map(c => c.planId));
+    const allowed = new Set(s.db.planCourses.filter(pc => planIds.has(pc.planId)).map(pc => pc.courseId));
     const secIds = new Set(s.db.sections.filter(sec => allowed.has(sec.courseId)).map(sec => sec.id));
     return s.db.lessons.filter(l => l.isPublished && secIds.has(l.sectionId));
   };
 
   const rows = members.map(m => {
-    const lessons = memberLessons(m.planId);
+    const lessons = memberLessons(m.id);
     const done = lessons.filter(l => s.db.progress.some(p => p.userId === m.id && p.lessonId === l.id && p.completedAt)).length;
     const pct = lessons.length ? Math.round((done / lessons.length) * 100) : 0;
     const lastP = s.db.progress.filter(p => p.userId === m.id && p.watchedAt).map(p => p.watchedAt!).sort().pop();
@@ -77,7 +79,7 @@ export default function AdminProgressPage() {
             <table>
               <thead><tr><th>レッスン</th><th>視聴回数</th><th>視聴完了日</th><th>状態</th><th>テスト（得点/受験回数）</th></tr></thead>
               <tbody>
-                {memberLessons(sel.planId).map(l => {
+                {memberLessons(sel.id).map(l => {
                   const p = s.db.progress.find(x => x.userId === sel.id && x.lessonId === l.id);
                   const rs = s.db.quizResults.filter(r => r.userId === sel.id && r.lessonId === l.id);
                   const best = rs.length ? Math.max(...rs.map(r => r.score)) : null;

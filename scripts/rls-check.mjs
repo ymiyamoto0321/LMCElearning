@@ -18,7 +18,7 @@ const URL = env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
 const ANON = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 if (!URL || !ANON) { console.error("❌ NEXT_PUBLIC_SUPABASE_URL / ANON_KEY が未設定です（.env.local）"); process.exit(1); }
 
-const TABLES = ["profiles", "plans", "plan_courses", "courses", "sections", "lessons", "questions", "progress", "quiz_results", "favorites"];
+const TABLES = ["profiles", "member_plans", "plans", "plan_courses", "courses", "sections", "lessons", "questions", "progress", "quiz_results", "favorites"];
 let failed = 0;
 const check = (label, ok, detail = "") => {
   console.log(`${ok ? "✅" : "❌"} ${label}${detail ? `  (${detail})` : ""}`);
@@ -50,9 +50,12 @@ if (email && pass) {
     check("会員に下書きレッスンが見えない", (lessons ?? []).every(r => r.is_published));
     const { data: profs } = await c.from("profiles").select("id");
     check("会員 profiles は自分の行のみ", (profs ?? []).length === 1 && profs[0].id === uid);
-    const { data: myPlan } = await c.from("profiles").select("plan_id").eq("id", uid).single();
+    const { data: myContracts } = await c.from("member_plans").select("user_id, plan_id, status, expires_at");
+    check("会員 member_plans は自分の契約のみ", (myContracts ?? []).every(r => r.user_id === uid));
+    const today = new Date().toISOString().slice(0, 10);
+    const validPlans = new Set((myContracts ?? []).filter(r => r.status === "active" && r.expires_at >= today).map(r => r.plan_id));
     const { data: pcs } = await c.from("plan_courses").select("plan_id");
-    check("会員 plan_courses は自分のプランのみ", (pcs ?? []).every(r => r.plan_id === myPlan?.plan_id));
+    check("会員 plan_courses は有効な契約のプランのみ", (pcs ?? []).every(r => validPlans.has(r.plan_id)));
     await c.auth.signOut();
   }
 } else {

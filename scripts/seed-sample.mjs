@@ -73,7 +73,7 @@ async function addQuestions(lessonId, lessonTitle, qs) {
   log(`✅ 「${lessonTitle}」に${qs.length}問登録`);
 }
 
-/* ---------- 4. 会員 ---------- */
+/* ---------- 4. 会員（契約は member_plans に登録） ---------- */
 async function upsertMember(m) {
   const { data: exist } = await svc.from("profiles").select("id").eq("email", m.email).maybeSingle();
   if (exist) { log(`⏭  会員 ${m.name} は既存`); return exist.id; }
@@ -81,10 +81,15 @@ async function upsertMember(m) {
   if (error) throw new Error(`Auth ${m.email}: ${error.message}`);
   const { error: pErr } = await svc.from("profiles").insert({
     id: created.user.id, name: m.name, email: m.email, role: "member",
-    status: m.status, plan_id: m.planId, expires_at: m.expiresAt, theme: m.theme,
-    last_login_at: m.lastLoginAt ?? null,
+    status: m.status, theme: m.theme, last_login_at: m.lastLoginAt ?? null,
   });
   if (pErr) { await svc.auth.admin.deleteUser(created.user.id); throw new Error(`profiles ${m.email}: ${pErr.message}`); }
+  if (m.planId) {
+    const { error: cErr } = await svc.from("member_plans").upsert({
+      user_id: created.user.id, plan_id: m.planId, expires_at: m.expiresAt, status: "active",
+    });
+    if (cErr) throw new Error(`member_plans ${m.email}: ${cErr.message}`);
+  }
   log(`✅ 会員「${m.name}」作成（${m.note}）`);
   return created.user.id;
 }

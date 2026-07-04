@@ -5,11 +5,11 @@
 // - 未設定なら「デモモード」（localStorage保存・デモアカウントで動作）
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
 import {
-  Member, Plan, PlanCourse, Course, Section, Lesson, Question, Progress, QuizResult, Favorite,
-  Theme, Role, MemberStatus, PASS_LINE,
+  Member, Contract, Plan, PlanCourse, Course, Section, Lesson, Question, Progress, QuizResult, Favorite,
+  Theme, Role, MemberStatus, PASS_LINE, isContractValid,
 } from "./types";
 import {
-  demoMembers, demoPlans, demoPlanCourses, demoCourses, demoSections, demoLessons,
+  demoMembers, demoContracts, demoPlans, demoPlanCourses, demoCourses, demoSections, demoLessons,
   demoQuestions, demoProgress, demoQuizResults, demoFavorites,
 } from "./demo-data";
 import { getSupabase } from "./supabase";
@@ -18,6 +18,7 @@ const LS_KEY = "lmc-elearning-demo-v1";
 
 interface DB {
   members: Member[];
+  contracts: Contract[];
   plans: Plan[];
   planCourses: PlanCourse[];
   courses: Course[];
@@ -30,11 +31,11 @@ interface DB {
 }
 
 const emptyDB: DB = {
-  members: [], plans: [], planCourses: [], courses: [], sections: [],
+  members: [], contracts: [], plans: [], planCourses: [], courses: [], sections: [],
   lessons: [], questions: [], progress: [], quizResults: [], favorites: [],
 };
 const initialDemoDB: DB = {
-  members: demoMembers, plans: demoPlans, planCourses: demoPlanCourses, courses: demoCourses,
+  members: demoMembers, contracts: demoContracts, plans: demoPlans, planCourses: demoPlanCourses, courses: demoCourses,
   sections: demoSections, lessons: demoLessons, questions: demoQuestions,
   progress: demoProgress, quizResults: demoQuizResults, favorites: demoFavorites,
 };
@@ -47,8 +48,11 @@ const str = (v: unknown) => (v as string) ?? "";
 const rowToMember = (r: Row): Member => ({
   id: str(r.id), name: str(r.name), email: str(r.email),
   role: (r.role as Role) ?? "member", status: (r.status as MemberStatus) ?? "active",
-  planId: (r.plan_id as string) ?? null, expiresAt: str(r.expires_at),
   theme: (r.theme as Theme) ?? "standard", lastLoginAt: str(r.last_login_at), createdAt: str(r.created_at),
+});
+const rowToContract = (r: Row): Contract => ({
+  userId: str(r.user_id), planId: str(r.plan_id), expiresAt: str(r.expires_at),
+  status: (r.status as Contract["status"]) ?? "active", createdAt: str(r.created_at),
 });
 const rowToPlan = (r: Row): Plan => ({ id: str(r.id), name: str(r.name), description: str(r.description), sortOrder: (r.sort_order as number) ?? 0 });
 const rowToPlanCourse = (r: Row): PlanCourse => ({ planId: str(r.plan_id), courseId: str(r.course_id) });
@@ -83,6 +87,9 @@ interface Store {
   logout: () => void;
   requestPasswordReset: (email: string) => Promise<void>;
   updatePassword: (newPassword: string) => Promise<OpResult>;
+  // 契約ヘルパー
+  contractsOf: (userId: string) => Contract[];
+  hasValidAccess: (userId: string) => boolean; // 有効な契約が1つ以上あるか
   // 会員側
   visibleCourses: () => Course[];
   sectionsOf: (courseId: string) => Section[];
@@ -110,10 +117,15 @@ interface Store {
   addQuestion: (q: Omit<Question, "id">) => void;
   updateQuestion: (id: string, patch: Partial<Question>) => void;
   deleteQuestion: (id: string) => void;
-  addMember: (m: Omit<Member, "id" | "role" | "lastLoginAt" | "createdAt">, password: string) => Promise<OpResult>;
+  addMember: (m: Omit<Member, "id" | "role" | "lastLoginAt" | "createdAt">, password: string, planId: string, expiresAt: string) => Promise<OpResult>;
   updateMember: (id: string, patch: Partial<Member>) => void;
   deleteMember: (id: string) => void;
   resetMemberPassword: (id: string, newPassword: string) => Promise<OpResult>;
+  // 契約管理
+  addContract: (userId: string, planId: string, expiresAt: string) => OpResult;
+  updateContractExpiry: (userId: string, planId: string, expiresAt: string) => void;
+  setContractStatus: (userId: string, planId: string, status: Contract["status"]) => void;
+  deleteContract: (userId: string, planId: string) => void;
   addPlan: (name: string, description: string) => void;
   updatePlan: (id: string, patch: Partial<Plan>) => void;
   deletePlan: (id: string) => boolean;
@@ -143,9 +155,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   /* ---------- 起動時: セッション復元 ---------- */
   const loadAll = useCallback(async (): Promise<DB> => {
     if (!supabase) return emptyDB;
-    const [members, plans, planCourses, courses, sections, lessons, questions, progress, quizResults, favorites] =
+    const [members, contracts, plans, planCourses, courses, sections, lessons, questions, progress, quizResults, favorites] =
       await Promise.all([
         supabase.from("profiles").select("*"),
+        supabase.from("member_plans").select("*"),
         supabase.from("plans").select("*"),
         supabase.from("plan_courses").select("*"),
         supabase.from("courses").select("*"),
@@ -158,6 +171,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       ]);
     return {
       members: (members.data ?? []).map(rowToMember),
+      contracts: (contracts.data ?? []).map(rowToContract),
       plans: (plans.data ?? []).map(rowToPlan),
       planCourses: (planCourses.data ?? []).map(rowToPlanCourse),
       courses: (courses.data ?? []).map(rowToCourse),
@@ -177,8 +191,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (data.session) {
           const next = await loadAll();
           const me = next.members.find(m => m.id === data.session!.user.id) ?? null;
-          // セッション復元時も有効期限・停止を検査
-          if (me && me.status === "active" && (me.role === "admin" || me.expiresAt >= todayStr())) {
+          // セッション復元時も停止・契約有効性（全契約期限切れ/無効化）を検査
+          const hasAccess = !!me && (me.role === "admin" ||
+            next.contracts.some(c => c.userId === me.id && isContractValid(c)));
+          if (me && me.status === "active" && hasAccess) {
             setDb(next); setUser(me); setThemeState(me.theme);
           } else {
             await supabase.auth.signOut();
@@ -217,6 +233,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [persist, isLive]);
 
   /* ---------- 認証 ---------- */
+  // 全契約の期限切れ/無効化メッセージ（最も遅い期限を表示）
+  const expiredMessage = (contracts: Contract[], userId: string): string => {
+    const mine = contracts.filter(c => c.userId === userId);
+    const latest = mine.map(c => c.expiresAt).sort().pop();
+    const d = latest ? latest.replace(/-/g, "/") : "―";
+    return `ご契約プランの有効期限（${d}）がすべて終了しているため、ログインできません。継続をご希望の場合は運営（info@life-m-c.com）までご連絡ください。`;
+  };
+
   const login = async (email: string, password: string): Promise<OpResult> => {
     if (supabase) {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -225,9 +249,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       const me = next.members.find(m => m.id === data.user.id) ?? null;
       if (!me) { await supabase.auth.signOut(); return { ok: false, message: "会員情報が見つかりません。運営までご連絡ください。" }; }
       if (me.status === "suspended") { await supabase.auth.signOut(); return { ok: false, message: "このアカウントは停止中です。運営までご連絡ください。" }; }
-      if (me.role !== "admin" && me.expiresAt < todayStr()) {
+      if (me.role !== "admin" && !next.contracts.some(c => c.userId === me.id && isContractValid(c))) {
         await supabase.auth.signOut();
-        return { ok: false, message: `ご利用期限（${me.expiresAt.replace(/-/g, "/")}）を過ぎているため、ログインできません。継続をご希望の場合は運営（info@life-m-c.com）までご連絡ください。` };
+        return { ok: false, message: expiredMessage(next.contracts, me.id) };
       }
       supabase.from("profiles").update({ last_login_at: new Date().toISOString() }).eq("id", me.id).then(undefined, logErr("last_login"));
       setDb(next); setUser(me); setThemeState(me.theme);
@@ -237,8 +261,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const m = db.members.find(x => x.email.toLowerCase() === email.toLowerCase());
     if (!m) return { ok: false, message: "メールアドレスまたはパスワードが正しくありません。" };
     if (m.status === "suspended") return { ok: false, message: "このアカウントは停止中です。運営までご連絡ください。" };
-    if (m.role !== "admin" && m.expiresAt < todayStr()) {
-      return { ok: false, message: `ご利用期限（${m.expiresAt.replace(/-/g, "/")}）を過ぎているため、ログインできません。継続をご希望の場合は運営（info@life-m-c.com）までご連絡ください。` };
+    if (m.role !== "admin" && !db.contracts.some(c => c.userId === m.id && isContractValid(c))) {
+      return { ok: false, message: expiredMessage(db.contracts, m.id) };
     }
     const logged = { ...m, lastLoginAt: new Date().toISOString() };
     const nextDb = { ...db, members: db.members.map(x => x.id === m.id ? logged : x) };
@@ -277,12 +301,19 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  /* ---------- 契約ヘルパー ---------- */
+  const contractsOf = (userId: string) => db.contracts.filter(c => c.userId === userId);
+  const hasValidAccess = (userId: string) =>
+    db.contracts.some(c => c.userId === userId && isContractValid(c));
+
   /* ---------- 会員側ヘルパー ---------- */
   const visibleCourses = (): Course[] => {
     const pub = db.courses.filter(c => c.isPublished).sort((a, b) => a.sortOrder - b.sortOrder);
     if (!user) return [];
     if (user.role === "admin") return pub;
-    const allowed = new Set(db.planCourses.filter(pc => pc.planId === user.planId).map(pc => pc.courseId));
+    // 有効な契約（期限内・無効化されていない）のプランに紐づくコースの合算
+    const myPlanIds = new Set(db.contracts.filter(c => c.userId === user.id && isContractValid(c)).map(c => c.planId));
+    const allowed = new Set(db.planCourses.filter(pc => myPlanIds.has(pc.planId)).map(pc => pc.courseId));
     return pub.filter(c => allowed.has(c.id));
   };
   const sectionsOf = (courseId: string) =>
@@ -511,20 +542,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return { ok: true };
   };
 
-  const addMember = async (m: Omit<Member, "id" | "role" | "lastLoginAt" | "createdAt">, password: string): Promise<OpResult> => {
+  const addMember = async (m: Omit<Member, "id" | "role" | "lastLoginAt" | "createdAt">, password: string, planId: string, expiresAt: string): Promise<OpResult> => {
     if (db.members.some(x => x.email.toLowerCase() === m.email.toLowerCase()))
       return { ok: false, message: "このメールアドレスは既に登録されています。" };
     if (isLive) {
       const r = await adminApi("POST", {
         name: m.name, email: m.email, password,
-        plan_id: m.planId, expires_at: m.expiresAt, theme: m.theme,
+        plan_id: planId, expires_at: expiresAt, theme: m.theme,
       });
       if (!r.ok) return r;
       const next = await loadAll();
       setDb(next);
       return { ok: true };
     }
-    update(d => ({ ...d, members: [...d.members, { ...m, id: uid("u"), role: "member", lastLoginAt: "", createdAt: todayStr() }] }));
+    const id = uid("u");
+    update(d => ({
+      ...d,
+      members: [...d.members, { ...m, id, role: "member", lastLoginAt: "", createdAt: todayStr() }],
+      contracts: [...d.contracts, { userId: id, planId, expiresAt, status: "active", createdAt: todayStr() }],
+    }));
     return { ok: true };
   };
 
@@ -535,11 +571,35 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         const row: Row = {};
         if (patch.name !== undefined) row.name = patch.name;
         if (patch.status !== undefined) row.status = patch.status;
-        if (patch.planId !== undefined) row.plan_id = patch.planId;
-        if (patch.expiresAt !== undefined) row.expires_at = patch.expiresAt;
         if (patch.theme !== undefined) row.theme = patch.theme;
         return supabase!.from("profiles").update(row).eq("id", id);
       },
+    );
+
+  /* ---------- 契約管理（会員×プラン） ---------- */
+  const addContract = (userId: string, planId: string, expiresAt: string): OpResult => {
+    if (db.contracts.some(c => c.userId === userId && c.planId === planId))
+      return { ok: false, message: "このプランは既に契約済みです（期限変更で延長できます）。" };
+    update(
+      d => ({ ...d, contracts: [...d.contracts, { userId, planId, expiresAt, status: "active", createdAt: todayStr() }] }),
+      () => supabase!.from("member_plans").insert({ user_id: userId, plan_id: planId, expires_at: expiresAt, status: "active" }),
+    );
+    return { ok: true };
+  };
+  const updateContractExpiry = (userId: string, planId: string, expiresAt: string) =>
+    update(
+      d => ({ ...d, contracts: d.contracts.map(c => c.userId === userId && c.planId === planId ? { ...c, expiresAt } : c) }),
+      () => supabase!.from("member_plans").update({ expires_at: expiresAt }).eq("user_id", userId).eq("plan_id", planId),
+    );
+  const setContractStatus = (userId: string, planId: string, status: Contract["status"]) =>
+    update(
+      d => ({ ...d, contracts: d.contracts.map(c => c.userId === userId && c.planId === planId ? { ...c, status } : c) }),
+      () => supabase!.from("member_plans").update({ status }).eq("user_id", userId).eq("plan_id", planId),
+    );
+  const deleteContract = (userId: string, planId: string) =>
+    update(
+      d => ({ ...d, contracts: d.contracts.filter(c => !(c.userId === userId && c.planId === planId)) }),
+      () => supabase!.from("member_plans").delete().eq("user_id", userId).eq("plan_id", planId),
     );
 
   const deleteMember = (id: string) => {
@@ -548,6 +608,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (r.ok) setDb(d => ({
           ...d,
           members: d.members.filter(m => m.id !== id),
+          contracts: d.contracts.filter(c => c.userId !== id),
           progress: d.progress.filter(p => p.userId !== id),
           quizResults: d.quizResults.filter(x => x.userId !== id),
           favorites: d.favorites.filter(f => f.userId !== id),
@@ -559,6 +620,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     update(d => ({
       ...d,
       members: d.members.filter(m => m.id !== id),
+      contracts: d.contracts.filter(c => c.userId !== id),
       progress: d.progress.filter(p => p.userId !== id),
       quizResults: d.quizResults.filter(r => r.userId !== id),
       favorites: d.favorites.filter(f => f.userId !== id),
@@ -590,7 +652,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
     );
   const deletePlan = (id: string): boolean => {
-    if (db.members.some(m => m.planId === id)) return false;
+    if (db.contracts.some(c => c.planId === id)) return false;
     update(
       d => ({ ...d, plans: d.plans.filter(p => p.id !== id), planCourses: d.planCourses.filter(pc => pc.planId !== id) }),
       () => supabase!.from("plans").delete().eq("id", id),
@@ -652,12 +714,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const store: Store = {
     db, user, ready, isLive, theme, setTheme, login, logout, requestPasswordReset, updatePassword,
+    contractsOf, hasValidAccess,
     visibleCourses, sectionsOf, lessonsOf, visibleLessons, progressOf, stateOf,
     overallRate, courseRate, recordView, recordWatched, submitQuiz, isFav, toggleFav, myQuizResults,
     addSection, updateSection, deleteSection, moveSection,
     addLesson, updateLesson, deleteLesson, moveLesson,
     addQuestion, updateQuestion, deleteQuestion,
     addMember, updateMember, deleteMember, resetMemberPassword,
+    addContract, updateContractExpiry, setContractStatus, deleteContract,
     addPlan, updatePlan, deletePlan, setPlanCourse,
     addCourse, updateCourse, deleteCourse, moveCourse,
   };

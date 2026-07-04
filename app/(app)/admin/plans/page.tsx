@@ -15,7 +15,7 @@ export default function AdminPlansPage() {
   const courses = [...s.db.courses].sort((a, b) => a.sortOrder - b.sortOrder);
   const has = (planId: string, courseId: string) =>
     s.db.planCourses.some(pc => pc.planId === planId && pc.courseId === courseId);
-  const memberCount = (planId: string) => s.db.members.filter(m => m.planId === planId).length;
+  const memberCount = (planId: string) => s.db.contracts.filter(c => c.planId === planId).length;
 
   return (
     <>

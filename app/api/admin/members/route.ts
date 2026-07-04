@@ -45,11 +45,21 @@ export async function POST(req: NextRequest) {
   }
   const { error: profErr } = await svc.from("profiles").insert({
     id: created.user.id, name, email, role: "member", status: "active",
-    plan_id: plan_id || null, expires_at, theme: theme || "standard",
+    theme: theme || "standard",
   });
   if (profErr) {
     await svc.auth.admin.deleteUser(created.user.id); // ロールバック
     return NextResponse.json({ error: "会員情報の登録に失敗しました: " + profErr.message }, { status: 400 });
+  }
+  // 初回契約（プランごとの有効期限）を登録
+  if (plan_id) {
+    const { error: cErr } = await svc.from("member_plans").insert({
+      user_id: created.user.id, plan_id, expires_at, status: "active",
+    });
+    if (cErr) {
+      await svc.auth.admin.deleteUser(created.user.id); // ロールバック
+      return NextResponse.json({ error: "契約の登録に失敗しました: " + cErr.message }, { status: 400 });
+    }
   }
   return NextResponse.json({ ok: true, user_id: created.user.id });
 }

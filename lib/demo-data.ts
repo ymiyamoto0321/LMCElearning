@@ -1,5 +1,5 @@
 // デモデータ（プロトタイプ用。Supabase接続後はDBのシードデータに置き換え）
-import { Member, Plan, PlanCourse, Course, Section, Lesson, Question, Progress, QuizResult, Favorite } from "./types";
+import { Member, Contract, Plan, PlanCourse, Course, Section, Lesson, Question, Progress, QuizResult, Favorite } from "./types";
 
 export const demoPlans: Plan[] = [
   { id: "p-basic", name: "ベーシック", description: "経営コースのみ", sortOrder: 1 },
@@ -18,11 +18,19 @@ export const demoPlanCourses: PlanCourse[] = [
 ];
 
 export const demoMembers: Member[] = [
-  { id: "u-admin", name: "宮本 悠樹", email: "info@life-m-c.com", role: "admin", status: "active", planId: null, expiresAt: "2099-12-31", theme: "standard", lastLoginAt: "2026-07-04T09:00:00", createdAt: "2026-07-01" },
-  { id: "u-hanako", name: "デモ会員 花子", email: "member@demo.jp", role: "member", status: "active", planId: "p-premium", expiresAt: "2027-09-14", theme: "rose", lastLoginAt: "2026-07-02T21:14:00", createdAt: "2026-09-15" },
-  { id: "u-sato", name: "佐藤 美咲", email: "sato@demo.jp", role: "member", status: "active", planId: "p-basic", expiresAt: "2026-07-25", theme: "rose", lastLoginAt: "2026-06-28T09:40:00", createdAt: "2026-09-20" },
-  { id: "u-tanaka", name: "田中 由紀", email: "tanaka@demo.jp", role: "member", status: "active", planId: "p-basic", expiresAt: "2026-06-01", theme: "standard", lastLoginAt: "2026-05-12T18:03:00", createdAt: "2025-06-01" },
-  { id: "u-suzuki", name: "鈴木 恵", email: "suzuki@demo.jp", role: "member", status: "suspended", planId: "p-premium", expiresAt: "2027-09-30", theme: "rose", lastLoginAt: "2026-04-02T11:20:00", createdAt: "2026-10-01" },
+  { id: "u-admin", name: "宮本 悠樹", email: "info@life-m-c.com", role: "admin", status: "active", theme: "standard", lastLoginAt: "2026-07-04T09:00:00", createdAt: "2026-07-01" },
+  { id: "u-hanako", name: "デモ会員 花子", email: "member@demo.jp", role: "member", status: "active", theme: "rose", lastLoginAt: "2026-07-02T21:14:00", createdAt: "2026-09-15" },
+  { id: "u-sato", name: "佐藤 美咲", email: "sato@demo.jp", role: "member", status: "active", theme: "rose", lastLoginAt: "2026-06-28T09:40:00", createdAt: "2026-09-20" },
+  { id: "u-tanaka", name: "田中 由紀", email: "tanaka@demo.jp", role: "member", status: "active", theme: "standard", lastLoginAt: "2026-05-12T18:03:00", createdAt: "2025-06-01" },
+  { id: "u-suzuki", name: "鈴木 恵", email: "suzuki@demo.jp", role: "member", status: "suspended", theme: "rose", lastLoginAt: "2026-04-02T11:20:00", createdAt: "2026-10-01" },
+];
+
+// 契約（会員×プラン）: 有効期限・無効化は契約単位
+export const demoContracts: Contract[] = [
+  { userId: "u-hanako", planId: "p-premium", expiresAt: "2027-09-14", status: "active", createdAt: "2026-09-15" },
+  { userId: "u-sato", planId: "p-basic", expiresAt: "2026-07-25", status: "active", createdAt: "2026-09-20" },
+  { userId: "u-tanaka", planId: "p-basic", expiresAt: "2026-06-01", status: "active", createdAt: "2025-06-01" }, // 全契約が期限切れ→ログイン不可
+  { userId: "u-suzuki", planId: "p-premium", expiresAt: "2027-09-30", status: "active", createdAt: "2026-10-01" },
 ];
 
 export const demoSections: Section[] = [

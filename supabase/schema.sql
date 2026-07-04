@@ -32,11 +32,20 @@ create table if not exists profiles (
   email text not null unique,
   role text not null default 'member' check (role in ('member','admin')),
   status text not null default 'active' check (status in ('active','suspended')),
-  plan_id uuid references plans(id),
-  expires_at date not null,
   theme text not null default 'standard' check (theme in ('standard','rose')),
   last_login_at timestamptz,
   created_at timestamptz not null default now()
+);
+
+-- 契約（会員×プラン）。有効期限・強制無効化は契約単位で管理
+-- すべての契約が期限切れ/無効化になった会員はログイン不可（アプリ側で判定）
+create table if not exists member_plans (
+  user_id uuid not null references profiles(id) on delete cascade,
+  plan_id uuid not null references plans(id),
+  expires_at date not null,
+  status text not null default 'active' check (status in ('active','disabled')),
+  created_at timestamptz not null default now(),
+  primary key (user_id, plan_id)
 );
 
 -- プラン×コース割当（多対多）
@@ -120,24 +129,33 @@ language sql stable security definer set search_path = public as $$
   );
 $$;
 
--- 自分のプランID
-create or replace function my_plan_id() returns uuid
+-- 自分がそのプランの有効な契約（期限内・無効化されていない）を持つか
+create or replace function my_valid_plan(pid uuid) returns boolean
 language sql stable security definer set search_path = public as $$
-  select plan_id from profiles where id = auth.uid();
+  select exists (
+    select 1 from member_plans
+    where user_id = auth.uid() and plan_id = pid
+      and status = 'active' and expires_at >= current_date
+  );
 $$;
 
--- 自分のプランで閲覧できるコースか
+-- 有効な契約のプランで閲覧できるコースか
 create or replace function can_view_course(cid uuid) returns boolean
 language sql stable security definer set search_path = public as $$
   select is_admin() or exists (
-    select 1 from plan_courses
-    where plan_id = my_plan_id() and course_id = cid
+    select 1
+    from member_plans mp
+    join plan_courses pc on pc.plan_id = mp.plan_id
+    where mp.user_id = auth.uid()
+      and mp.status = 'active' and mp.expires_at >= current_date
+      and pc.course_id = cid
   );
 $$;
 
 -- ---------- RLS（行レベルセキュリティ） ----------
 
 alter table profiles enable row level security;
+alter table member_plans enable row level security;
 alter table plans enable row level security;
 alter table courses enable row level security;
 alter table plan_courses enable row level security;
@@ -154,10 +172,14 @@ create policy "profiles_update_own" on profiles for update using (id = auth.uid(
 create policy "profiles_admin_insert" on profiles for insert with check (is_admin());
 create policy "profiles_admin_delete" on profiles for delete using (is_admin());
 
--- plans / plan_courses: 会員は自分のプランのみ / adminは全操作
-create policy "plans_select" on plans for select using (id = my_plan_id() or is_admin());
+-- member_plans（契約）: 本人は自分の契約のみ閲覧 / adminは全操作
+create policy "member_plans_select" on member_plans for select using (user_id = auth.uid() or is_admin());
+create policy "member_plans_admin_all" on member_plans for all using (is_admin()) with check (is_admin());
+
+-- plans / plan_courses: 会員は有効な契約のプランのみ / adminは全操作
+create policy "plans_select" on plans for select using (my_valid_plan(id) or is_admin());
 create policy "plans_admin_all" on plans for all using (is_admin()) with check (is_admin());
-create policy "plan_courses_select" on plan_courses for select using (plan_id = my_plan_id() or is_admin());
+create policy "plan_courses_select" on plan_courses for select using (my_valid_plan(plan_id) or is_admin());
 create policy "plan_courses_admin_all" on plan_courses for all using (is_admin()) with check (is_admin());
 
 -- courses: 会員はプラン内・公開中のみ / adminは全操作
@@ -223,8 +245,7 @@ where (p.name = 'ベーシック' and c.title = '経営コース')
    or (p.name = 'プレミアム');
 
 -- 注意:
--- 1) 管理者アカウントは Supabase Auth でユーザー作成後、
---    insert into profiles (id, name, email, role, expires_at)
---    values ('<auth.usersのUUID>', '宮本 悠樹', 'info@life-m-c.com', 'admin', '2099-12-31');
+-- 1) 管理者アカウントは scripts/create-admin.mjs で作成する（Auth＋profiles）。
+--    管理者は契約（member_plans）不要で全コース閲覧可。
 -- 2) 会員の発行は管理画面（会員管理）から行う。Auth ユーザー作成には
 --    service_role キーが必要なため、サーバー側（Route Handler）で実装する。

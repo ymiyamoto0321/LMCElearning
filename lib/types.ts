@@ -9,12 +9,25 @@ export interface Member {
   name: string;
   email: string;
   role: Role;
-  status: MemberStatus;
-  planId: string | null; // 契約プラン（adminはnull=全コース）
-  expiresAt: string;     // 有効期限日 YYYY-MM-DD
+  status: MemberStatus; // 会員単位の強制停止
   theme: Theme;
   lastLoginAt: string;   // ISO文字列（未ログインは""）
   createdAt: string;
+}
+
+/** 契約（会員×プラン）。有効期限・強制無効化は契約単位で管理する */
+export interface Contract {
+  userId: string;
+  planId: string;
+  expiresAt: string; // 有効期限日 YYYY-MM-DD
+  status: "active" | "disabled"; // disabled=強制無効化
+  createdAt: string;
+}
+
+/** 契約が現在有効か（期限内かつ無効化されていない） */
+export function isContractValid(c: Contract, today?: string): boolean {
+  const t = today ?? new Date().toISOString().slice(0, 10);
+  return c.status === "active" && c.expiresAt >= t;
 }
 
 export interface Plan {

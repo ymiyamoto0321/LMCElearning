@@ -7,7 +7,7 @@ import { useStore } from "@/lib/store";
 import { LogoMark } from "@/components/ui";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, ready, logout, theme, setTheme } = useStore();
+  const { user, ready, logout, theme, setTheme, hasValidAccess } = useStore();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -21,7 +21,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     if (!user) { router.replace("/login"); return; }
-    if (user.role !== "admin" && user.expiresAt < new Date().toISOString().slice(0, 10)) {
+    // 全契約が期限切れ/無効化、または停止された場合は強制ログアウト
+    if (user.role !== "admin" && (user.status !== "active" || !hasValidAccess(user.id))) {
       logout();
       router.replace("/login");
       return;

@@ -27,7 +27,7 @@ const { data: created, error } = await svc.auth.admin.createUser({ email, passwo
 if (error) { console.error("❌ Authユーザー作成に失敗:", error.message); process.exit(1); }
 
 const { error: profErr } = await svc.from("profiles").insert({
-  id: created.user.id, name, email, role: "admin", status: "active", expires_at: "2099-12-31",
+  id: created.user.id, name, email, role: "admin", status: "active",
 });
 if (profErr) {
   await svc.auth.admin.deleteUser(created.user.id);
