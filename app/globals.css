@@ -2,9 +2,10 @@
   --navy:#1a2b4a; --navy-d:#12203a; --gold:#c9a63c; --gold-l:#e8d391;
   --bg:#f2f4f8; --line:#dde3ec; --sub:#5a6a84; --ok:#2e9e5b; --warn:#c05353;
 }
-/* ローズテーマ（女性向け既定） */
+/* ローズテーマ（女性向け既定）
+   背景は淡いピンクグラデーション基調。濃ローズは文字・アクセントのみに使用 */
 body.theme-rose{
-  --navy:#950246; --navy-d:#C7025D; --gold:#C7025D; --gold-l:#E380AE;
+  --navy:#a81955; --navy-d:#f2c3da; --gold:#d4468a; --gold-l:#E380AE;
   --bg:#FFF5FA; --line:#F2D4E2; --sub:#8a5570;
 }
 *{margin:0;padding:0;box-sizing:border-box;font-family:"Hiragino Kaku Gothic ProN","Yu Gothic",system-ui,sans-serif;}
@@ -145,3 +146,26 @@ tr:hover td{background:#f7f9fc;}
 
 .proto-note{background:var(--navy-d);color:#cdd6e6;font-size:12px;text-align:center;padding:5px;}
 .proto-note b{color:var(--gold-l);}
+
+/* ===== ローズテーマ: 濃ローズ背景 → 淡ピンクグラデーションへの置き換え ===== */
+/* サイドメニュー */
+body.theme-rose .side{background:linear-gradient(165deg,#f5cadd 0%,#fbe3ee 55%,#f7d6e6 100%);}
+body.theme-rose .side-brand{color:#7a1a4a;border-bottom:1px solid rgba(170,50,100,.16);}
+body.theme-rose .side nav a{color:#8a5570;}
+body.theme-rose .side nav a.active{background:rgba(255,255,255,.65);color:#a81955;border-left-color:#d4468a;}
+body.theme-rose .sec-label{color:#bb8ba2;}
+body.theme-rose .side-user{color:#8a5570;border-top:1px solid rgba(170,50,100,.16);}
+body.theme-rose .side-user b{color:#7a1a4a;}
+body.theme-rose .side-user button{border-color:#dda6c1;color:#8a5570;}
+/* 表ヘッダ・章見出し・ボタン等 */
+body.theme-rose th{background:#f3c3d9;color:#7a1a4a;border-color:#eeb3cf;}
+body.theme-rose .sec-head{background:linear-gradient(90deg,#f5cadd,#fbe3ee);color:#7a1a4a;}
+body.theme-rose .sec-head .cnt{color:#c7407e;}
+body.theme-rose .btn-primary{background:linear-gradient(120deg,#f0b9d2,#f6d3e4);color:#7a1a4a;}
+body.theme-rose .btn-gold{background:#e888b4;}
+body.theme-rose .menu-btn{background:#f0b9d2;color:#7a1a4a;}
+body.theme-rose .login-wrap{background:linear-gradient(150deg,#f0b9d2 0%,#fbe9f2 70%);}
+body.theme-rose .course-tabs button.on{background:#f0b9d2;border-color:#e888b4;color:#7a1a4a;}
+body.theme-rose .proto-note{background:#f5cadd;color:#8a5570;}
+body.theme-rose .proto-note b{color:#a81955;}
+body.theme-rose .st-watch{background:#e888b4;}
