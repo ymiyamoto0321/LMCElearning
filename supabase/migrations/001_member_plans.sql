@@ -21,13 +21,14 @@ from profiles
 where role = 'member' and plan_id is not null
 on conflict (user_id, plan_id) do nothing;
 
--- 3) 旧ポリシー・旧関数を削除（my_plan_id 依存のもの）
+-- 3) 旧ポリシーを削除（my_plan_id 依存のもののみ）
+-- ※can_view_course は courses/sections/lessons/questions のポリシーが依存しているため
+--   dropせず create or replace で上書きする
 drop policy if exists "plans_select" on plans;
 drop policy if exists "plan_courses_select" on plan_courses;
-drop function if exists can_view_course(uuid);
 drop function if exists my_plan_id();
 
--- 4) 新しい関数
+-- 4) 新しい関数（can_view_courseは上書き）
 create or replace function my_valid_plan(pid uuid) returns boolean
 language sql stable security definer set search_path = public as $$
   select exists (
