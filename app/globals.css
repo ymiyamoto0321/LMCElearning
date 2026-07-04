@@ -151,8 +151,8 @@ body.theme-rose .side{background:linear-gradient(165deg,#f5cadd 0%,#fbe3ee 55%,#
 body.theme-rose .side-brand{color:#7a1a4a;border-bottom:1px solid rgba(170,50,100,.16);}
 body.theme-rose .side nav a{color:#8a5570;}
 body.theme-rose .side nav a.active{background:rgba(255,255,255,.65);color:#a81955;border-left-color:#C7025D;}
-body.theme-rose .sec-label{color:#bb8ba2;}
-body.theme-rose .side-user{color:#8a5570;border-top:1px solid rgba(170,50,100,.16);}
-body.theme-rose .side-user b{color:#7a1a4a;}
-body.theme-rose .side-user button{border-color:#dda6c1;color:#8a5570;}
+body.theme-rose .sec-label{background:#950246;color:#fff;font-weight:700;padding:7px 20px;margin-top:10px;}
+body.theme-rose .side-user{background:#950246;color:#f6cfe0;border-top:none;}
+body.theme-rose .side-user b{color:#fff;}
+body.theme-rose .side-user button{border-color:rgba(255,255,255,.45);color:#fbe3ee;}
 body.theme-rose .side-brand b span{color:#C7025D;}
