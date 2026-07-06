@@ -273,3 +273,43 @@ body.theme-beauty .bq .h-tl{position:absolute;top:13px;left:19px;color:#D98A9C;f
 body.theme-beauty .bq .h-br{position:absolute;bottom:13px;right:19px;color:#D98A9C;font-size:13px;}
 body.theme-beauty .bq .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#C9A87C;letter-spacing:.24em;}
 body.theme-beauty .bq .msg{font-family:'Zen Old Mincho',serif;font-size:15px;letter-spacing:.18em;color:#5C4A50;margin-top:8px;}
+
+/* ===== ビューティテーマ: デモHTML完全準拠の書体・サイズ・色 ===== */
+/* 見出し・リード（デモ page-head と同値） */
+body.theme-beauty .page-title{font-size:23px;font-weight:600;letter-spacing:.16em;line-height:1.5;}
+body.theme-beauty .page-sub{font-size:12.5px;letter-spacing:.08em;color:#8A7379;}
+/* カード見出し（デモは左ボーダーなし・明朝15px） */
+body.theme-beauty .card h3{font-size:15px;border-left:none;padding-left:0;letter-spacing:.14em;}
+/* 達成率数字・進捗バー（デモ: 56px Cormorant / バー8px） */
+body.theme-beauty .big-rate{font-size:56px;}
+body.theme-beauty .pbar{height:8px !important;}
+/* サイドメニュー文字 */
+body.theme-beauty .side nav a{font-size:13.5px;letter-spacing:.1em;}
+/* バッジ＝デモの tagchip（10.5px・字間広め・ピンク系ステータス色） */
+body.theme-beauty .badge{font-size:10.5px;letter-spacing:.12em;padding:3px 12px;font-weight:400;}
+body.theme-beauty .b-done{background:#FDEEF0;color:#B76E79;border:1px solid #F6D2DA;}
+body.theme-beauty .b-watch{background:#FAF3E8;color:#A5854F;border:1px solid #EAD9BC;}
+body.theme-beauty .b-none{background:rgba(255,255,255,.8);color:#8A7379;border:1px solid #EEE3E6;}
+body.theme-beauty .b-draft{background:#FBEDEE;color:#C08A94;border:1px solid #F2D4DA;}
+body.theme-beauty .b-pub{background:#FDEEF0;color:#B76E79;border:1px solid #F6D2DA;}
+/* レッスン行＝デモの独立カード型（角丸16px・間隔10px） */
+body.theme-beauty .lesson-row{
+  border:1px solid rgba(246,210,218,.9);border-radius:16px;margin-bottom:10px;
+  background:rgba(255,255,255,.82);padding:14px 18px;transition:all .25s;
+}
+body.theme-beauty .lesson-row:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(217,138,156,.18);background:rgba(255,255,255,.92);}
+body.theme-beauty .lesson-row .ttl{font-size:13.5px;font-weight:400;letter-spacing:.06em;color:#5C4A50;}
+/* 状態アイコン＝デモの34px円（✓/▶/－・内側ハイライト） */
+body.theme-beauty .st{width:34px;height:34px;font-size:13px;font-weight:400;box-shadow:inset 0 2px 4px rgba(255,255,255,.5);}
+/* 章見出し＝デモの sec-band（帯なし・明朝・右にlessonsカウント） */
+body.theme-beauty .sec-head{
+  background:none;color:#5C4A50;padding:12px 4px 8px;border-radius:0;
+  font-family:'Zen Old Mincho',serif;font-size:16px;font-weight:600;letter-spacing:.16em;
+}
+body.theme-beauty .sec-head .cnt{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12.5px;color:#B76E79;font-weight:400;}
+/* ボタン＝デモと同色（ローズグラデーション・白抜き / 白地ライン） */
+body.theme-beauty .btn-gold{background:linear-gradient(120deg,#B76E79,#D98A9C);box-shadow:0 8px 20px rgba(183,110,121,.3);}
+body.theme-beauty .btn-ghost{background:rgba(255,255,255,.8);color:#B76E79;border:1px solid #F6D2DA;border-radius:999px;}
+/* テスト結果行の日付（英字イタリック小） */
+.ttl-sub{display:none;}
+body.theme-beauty .ttl-sub{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:#8A7379;letter-spacing:.14em;font-weight:400;}

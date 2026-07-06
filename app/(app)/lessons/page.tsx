@@ -73,7 +73,7 @@ export default function LessonsPage() {
         hit += ls.length;
         return (
           <div className="sec-block" key={sec.id}>
-            <div className="sec-head"><span>{sec.title}</span><span className="cnt">{done}/{all.length} 完了</span></div>
+            <div className="sec-head"><span>{sec.title}</span><span className="cnt">{s.theme === "beauty" ? `${done} / ${all.length} lessons` : `${done}/${all.length} 完了`}</span></div>
             {ls.map(l => {
               const state = s.stateOf(l.id);
               return (

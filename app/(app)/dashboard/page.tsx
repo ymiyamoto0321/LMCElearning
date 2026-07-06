@@ -55,21 +55,39 @@ export default function DashboardPage() {
       <div className="card">
         <h3>{beauty ? "直近の確認テスト" : "直近のテスト結果"}<span className="h-en">Recent Results</span></h3>
         {results.length ? (
-          <div className="tbl-wrap">
-            <table>
-              <thead><tr><th>受験日</th><th>レッスン</th><th>得点</th><th>結果</th></tr></thead>
-              <tbody>
-                {results.map(r => (
-                  <tr key={r.id}>
-                    <td>{r.takenAt.slice(0, 10).replace(/-/g, "/")}</td>
-                    <td>{lessonTitle(r.lessonId)}</td>
-                    <td>{r.score}/5</td>
-                    <td>{r.passed ? <span className="badge b-done">合格</span> : <span className="badge b-draft">不合格</span>}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          beauty ? (
+            /* ビューティ: デモと同じアイコン付きカード行 */
+            <div>
+              {results.map(r => (
+                <div className="lesson-row" style={{ cursor: "default" }} key={r.id}>
+                  <div className={`st ${r.passed ? "st-done" : "st-watch"}`}>{r.passed ? "✓" : "✎"}</div>
+                  <div className="ttl">
+                    {lessonTitle(r.lessonId)}
+                    <span className="ttl-sub">
+                      {new Date(r.takenAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                  <span className={`badge ${r.passed ? "b-done" : "b-watch"}`}>{r.score}/5 {r.passed ? "合格" : "もう一歩"}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="tbl-wrap">
+              <table>
+                <thead><tr><th>受験日</th><th>レッスン</th><th>得点</th><th>結果</th></tr></thead>
+                <tbody>
+                  {results.map(r => (
+                    <tr key={r.id}>
+                      <td>{r.takenAt.slice(0, 10).replace(/-/g, "/")}</td>
+                      <td>{lessonTitle(r.lessonId)}</td>
+                      <td>{r.score}/5</td>
+                      <td>{r.passed ? <span className="badge b-done">合格</span> : <span className="badge b-draft">不合格</span>}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
         ) : (
           <p style={{ fontSize: 13.5, color: "var(--sub)" }}>まだテストの受験履歴がありません。</p>
         )}
