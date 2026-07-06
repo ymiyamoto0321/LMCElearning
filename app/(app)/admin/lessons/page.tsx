@@ -31,7 +31,7 @@ export default function AdminLessonsPage() {
   const save = () => {
     if (!form.title.trim()) { setErr("タイトルは必須です。"); return; }
     const vid = extractVideoId(form.videoUrl);
-    if (!vid) { setErr("YouTubeのURL（youtu.be／youtube.com/watch）または動画IDを入力してください。"); return; }
+    if (!vid) { setErr("YouTubeのURL（youtu.be／youtube.com/watch）またはGoogle DriveのURL（drive.google.com/file/d/...）を入力してください。"); return; }
     const data = { title: form.title.trim(), description: form.description, videoId: vid, pdfUrl: form.pdfUrl.trim() };
     if (editing) s.updateLesson(editing.id, data);
     else if (addingTo) s.addLesson(addingTo, data);

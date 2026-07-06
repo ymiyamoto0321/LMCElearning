@@ -102,14 +102,26 @@ export interface Favorite {
 export const PASS_LINE = 4;   // 5問中4問正解で合格
 export const QUIZ_SIZE = 5;   // 出題数
 
-/** YouTube URL から動画IDを抽出（ID直接入力にも対応） */
+/** 動画URLからIDを抽出。YouTube（ID）または Google Drive（gdrive:ID 形式で保存） */
 export function extractVideoId(input: string): string | null {
   const s = input.trim();
-  if (/^[\w-]{11}$/.test(s)) return s;
+  if (/^[\w-]{11}$/.test(s) || /^gdrive:[\w-]+$/.test(s)) return s;
   const m =
     s.match(/youtu\.be\/([\w-]{11})/) ||
     s.match(/[?&]v=([\w-]{11})/) ||
     s.match(/youtube\.com\/embed\/([\w-]{11})/) ||
     s.match(/youtube\.com\/live\/([\w-]{11})/);
-  return m ? m[1] : null;
+  if (m) return m[1];
+  const d = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]+)/);
+  if (d) return `gdrive:${d[1]}`;
+  return null;
+}
+
+/** Google Drive動画か */
+export function isDriveVideo(videoId: string): boolean {
+  return videoId.startsWith("gdrive:");
+}
+/** Google Drive埋め込みプレーヤーURL */
+export function driveEmbedUrl(videoId: string): string {
+  return `https://drive.google.com/file/d/${videoId.replace(/^gdrive:/, "")}/preview`;
 }

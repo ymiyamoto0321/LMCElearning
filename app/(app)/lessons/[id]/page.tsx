@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useStore } from "@/lib/store";
+import { isDriveVideo, driveEmbedUrl } from "@/lib/types";
 
 declare global {
   interface Window {
@@ -36,9 +37,19 @@ export default function LessonPage() {
     if (!lesson || (!inPlan && !isAdmin)) router.replace("/lessons");
   }, [s.ready, s.user, lesson, inPlan, isAdmin, router]);
 
+  const drive = !!lesson && isDriveVideo(lesson.videoId);
+
+  // Google Drive動画: 開いた時点で視聴回数+1（再生イベントは取得不可のため）
+  useEffect(() => {
+    if (!lesson || !drive || countedRef.current) return;
+    countedRef.current = true;
+    s.recordView(lesson.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lesson?.id, drive]);
+
   // YouTube IFrame Player
   useEffect(() => {
-    if (!lesson || !playerRef.current) return;
+    if (!lesson || drive || !playerRef.current) return;
     let player: { destroy: () => void } | null = null;
     let cancelled = false;
 
@@ -98,7 +109,13 @@ export default function LessonPage() {
       <div className="page-sub">{section?.title}</div>
 
       <div className="card">
-        <div className="player-box"><div ref={playerRef} /></div>
+        <div className="player-box">
+          {drive ? (
+            <iframe src={driveEmbedUrl(lesson.videoId)} allow="autoplay" allowFullScreen />
+          ) : (
+            <div ref={playerRef} />
+          )}
+        </div>
         <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
           <button
             className={`fav ${s.isFav(lesson.id) ? "on" : ""}`}
@@ -108,7 +125,11 @@ export default function LessonPage() {
           >
             {s.isFav(lesson.id) ? "♥" : "♡"}
           </button>
-          {watched ? <span className="badge b-done">視聴完了</span> : <span className="badge b-none">未視聴（最後まで再生すると完了になります）</span>}
+          {watched
+            ? <span className="badge b-done">視聴完了</span>
+            : drive
+              ? <button className="btn btn-ghost btn-sm" onClick={() => s.recordWatched(lesson.id)}>✓ 視聴完了にする（Drive動画は自動判定できません）</button>
+              : <span className="badge b-none">未視聴（最後まで再生すると完了になります）</span>}
           {state === "done" && <span className="badge b-done">テスト合格済</span>}
           <span className="badge b-none">視聴回数：{progress?.viewCount ?? 0}回</span>
           {lesson.pdfUrl && (
