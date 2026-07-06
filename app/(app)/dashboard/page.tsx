@@ -20,11 +20,11 @@ export default function DashboardPage() {
   return (
     <>
       <div className="page-en">My Dashboard</div>
-      <div className="page-title">{beauty ? "今日も、じぶんを磨くじかん" : "ダッシュボード"}</div>
+      <div className="page-title">{beauty ? "今日もわたしを磨くじかん" : "ダッシュボード"}</div>
       <div className="page-sub">おかえりなさい、{s.user.name}さん。{beauty ? "学びの続きからご案内します。" : "今日も一歩前へ。"}</div>
       <div className="grid2">
         <div className="card" style={{ textAlign: "center" }}>
-          <h3>全体達成率</h3>
+          <h3>{beauty ? "全体の歩み" : "全体達成率"}<span className="h-en">Progress</span></h3>
           <div className="big-rate">{rate.pct}<small> %</small></div>
           <div style={{ margin: "10px 0 8px" }}><ProgressBar pct={rate.pct} /></div>
           <div style={{ fontSize: 13, color: "var(--sub)" }}>完了 {rate.done} / 全 {rate.total} レッスン</div>
@@ -37,7 +37,7 @@ export default function DashboardPage() {
           )}
         </div>
         <div className="card">
-          <h3>コースごとの進捗</h3>
+          <h3>{beauty ? "コースごとの歩み" : "コースごとの進捗"}<span className="h-en">Courses</span></h3>
           {s.visibleCourses().map(c => {
             const r = s.courseRate(c.id);
             return (
@@ -53,7 +53,7 @@ export default function DashboardPage() {
         </div>
       </div>
       <div className="card">
-        <h3>直近のテスト結果</h3>
+        <h3>{beauty ? "直近の確認テスト" : "直近のテスト結果"}<span className="h-en">Recent Results</span></h3>
         {results.length ? (
           <div className="tbl-wrap">
             <table>
@@ -73,6 +73,13 @@ export default function DashboardPage() {
         ) : (
           <p style={{ fontSize: 13.5, color: "var(--sub)" }}>まだテストの受験履歴がありません。</p>
         )}
+      </div>
+
+      {/* ビューティテーマ時のみ表示される引用バンド */}
+      <div className="bq">
+        <span className="h-tl">♡</span><span className="h-br">♡</span>
+        <div className="en">ONE STEP AT A TIME</div>
+        <div className="msg">きのうの自分より、一歩だけ前へ。</div>
       </div>
     </>
   );

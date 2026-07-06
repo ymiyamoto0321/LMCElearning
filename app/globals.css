@@ -256,3 +256,20 @@ body.theme-beauty .beauty-footer{display:block;text-align:center;padding:36px 0 
 body.theme-beauty .beauty-footer .lmc{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.34em;color:#B76E79;}
 body.theme-beauty .beauty-footer .co{font-size:10.5px;letter-spacing:.2em;margin-top:4px;}
 .brand-default{display:flex;align-items:center;gap:10px;}
+
+/* ===== ビューティテーマ: カード見出しの英字添え・引用バンド ===== */
+.h-en{display:none;}
+body.theme-beauty .h-en{
+  display:inline;font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:12px;color:#C9A87C;letter-spacing:.2em;margin-left:10px;font-weight:400;text-transform:uppercase;
+}
+.bq{display:none;}
+body.theme-beauty .bq{
+  display:block;margin-top:30px;border-radius:28px;padding:28px 32px;text-align:center;position:relative;
+  background:linear-gradient(120deg,rgba(253,238,240,.9),rgba(246,210,218,.55));
+  border:1px solid rgba(246,210,218,.9);
+}
+body.theme-beauty .bq .h-tl{position:absolute;top:13px;left:19px;color:#D98A9C;font-size:13px;}
+body.theme-beauty .bq .h-br{position:absolute;bottom:13px;right:19px;color:#D98A9C;font-size:13px;}
+body.theme-beauty .bq .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#C9A87C;letter-spacing:.24em;}
+body.theme-beauty .bq .msg{font-family:'Zen Old Mincho',serif;font-size:15px;letter-spacing:.18em;color:#5C4A50;margin-top:8px;}
