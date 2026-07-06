@@ -5,9 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useStore } from "@/lib/store";
 import { LogoMark } from "@/components/ui";
+import { isContractValid } from "@/lib/types";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, ready, logout, theme, setTheme, hasValidAccess } = useStore();
+  const { user, ready, logout, theme, setTheme, hasValidAccess, contractsOf, db } = useStore();
   const router = useRouter();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -70,7 +71,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="side-user">
           <b>{user.name}{theme === "beauty" ? " さま" : ""}</b>
-          {user.role === "admin" ? "管理者" : "会員"}
+          {user.role === "admin"
+            ? "管理者"
+            : (() => {
+                // 有効な契約のプラン名を表示（複数はスラッシュ区切り）
+                const names = contractsOf(user.id)
+                  .filter(c => isContractValid(c))
+                  .map(c => db.plans.find(p => p.id === c.planId)?.name ?? "")
+                  .filter(Boolean)
+                  .map(n => (n.endsWith("プラン") ? n : `${n}プラン`));
+                return names.length ? names.join("／") : "契約なし";
+              })()}
           <br />
           <button onClick={() => setTheme(theme === "standard" ? "rose" : theme === "rose" ? "beauty" : "standard")}>
             🎨 {theme === "standard" ? "スタンダード" : theme === "rose" ? "ローズ" : "ビューティ"}（切替）

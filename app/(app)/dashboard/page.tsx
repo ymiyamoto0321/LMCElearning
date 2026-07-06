@@ -20,7 +20,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className="page-en">My Dashboard</div>
-      <div className="page-title">{beauty ? "今日もわたしを磨くじかん" : "ダッシュボード"}</div>
+      <div className="page-title">{beauty ? "昨日より私らしく" : "ダッシュボード"}</div>
       <div className="page-sub">おかえりなさい、{s.user.name}さん。{beauty ? "学びの続きからご案内します。" : "今日も一歩前へ。"}</div>
       <div className="grid2">
         <div className="card" style={{ textAlign: "center" }}>
@@ -97,7 +97,7 @@ export default function DashboardPage() {
       <div className="bq">
         <span className="h-tl">♡</span><span className="h-br">♡</span>
         <div className="en">ONE STEP AT A TIME</div>
-        <div className="msg">きのうの自分より、一歩だけ前へ。</div>
+        <div className="msg">その一歩が、なりたい私への近道</div>
       </div>
     </>
   );
