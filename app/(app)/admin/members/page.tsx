@@ -100,6 +100,7 @@ export default function AdminMembersPage() {
             <select className="inline" value={form.theme} onChange={e => setForm({ ...form, theme: e.target.value as Theme })}>
               <option value="standard">スタンダード</option>
               <option value="rose">ローズ（女性向け）</option>
+              <option value="beauty">ビューティ（美容サロン風）</option>
             </select>
           </label>
           <button className="btn btn-gold btn-sm" onClick={issue}>発行する</button>

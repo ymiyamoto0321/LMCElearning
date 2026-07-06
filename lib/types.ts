@@ -1,7 +1,7 @@
 // LMC e-learning 型定義（詳細設計書 v1.0 のテーブル構成に対応）
 
 export type Role = "admin" | "member";
-export type Theme = "standard" | "rose";
+export type Theme = "standard" | "rose" | "beauty";
 export type MemberStatus = "active" | "suspended";
 
 export interface Member {

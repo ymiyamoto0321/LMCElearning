@@ -32,7 +32,7 @@ create table if not exists profiles (
   email text not null unique,
   role text not null default 'member' check (role in ('member','admin')),
   status text not null default 'active' check (status in ('active','suspended')),
-  theme text not null default 'standard' check (theme in ('standard','rose')),
+  theme text not null default 'standard' check (theme in ('standard','rose','beauty')),
   last_login_at timestamptz,
   created_at timestamptz not null default now()
 );

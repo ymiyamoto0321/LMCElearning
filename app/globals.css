@@ -156,3 +156,66 @@ body.theme-rose .side-user{background:#950246;color:#f6cfe0;border-top:none;}
 body.theme-rose .side-user b{color:#fff;}
 body.theme-rose .side-user button{border-color:rgba(255,255,255,.45);color:#fbe3ee;}
 body.theme-rose .side-brand b span{color:#C7025D;}
+
+/* ===== ビューティテーマ（美容サロン風・Beauty Edition） =====
+   クリーム地×淡ピンクの光・明朝見出し×Cormorant英字・ローズゴールドアクセント */
+body.theme-beauty{
+  --navy:#B76E79; --navy-d:#9D7A87; --gold:#C9A87C; --gold-l:#D98A9C;
+  --bg:#FFF9F6; --line:#F6D2DA; --sub:#8A7379;
+  color:#5C4A50;
+  font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;
+  background:
+    radial-gradient(ellipse 900px 600px at 85% -5%, rgba(246,210,218,.55), transparent 60%),
+    radial-gradient(ellipse 800px 700px at -10% 25%, rgba(253,238,240,.9), transparent 60%),
+    radial-gradient(ellipse 700px 600px at 105% 65%, rgba(246,210,218,.4), transparent 60%),
+    #FFF9F6;
+}
+/* 見出しは明朝でゆったりと */
+body.theme-beauty .page-title{font-family:'Zen Old Mincho',serif;letter-spacing:.12em;font-weight:600;}
+body.theme-beauty .card h3{font-family:'Zen Old Mincho',serif;letter-spacing:.14em;border-left-color:#C9A87C;}
+body.theme-beauty .big-rate{font-family:'Cormorant Garamond',serif;font-weight:500;
+  background:linear-gradient(120deg,#B76E79,#D98A9C 50%,#C9A87C);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+/* カードはふんわり */
+body.theme-beauty .card{background:rgba(255,255,255,.82);border-color:rgba(246,210,218,.9);
+  border-radius:20px;box-shadow:0 8px 26px rgba(217,138,156,.12);}
+body.theme-beauty .search-bar{background:rgba(255,255,255,.82);border-color:rgba(246,210,218,.9);}
+/* サイドメニュー */
+body.theme-beauty .side{background:linear-gradient(170deg,rgba(253,238,240,.97),rgba(255,249,246,.94) 55%,rgba(246,210,218,.6));border-right:1px solid rgba(246,210,218,.8);}
+body.theme-beauty .side-brand{color:#5C4A50;border-bottom:1px solid rgba(246,210,218,.8);font-family:'Zen Old Mincho',serif;letter-spacing:.14em;}
+body.theme-beauty .side-brand b span{color:#B76E79;}
+body.theme-beauty .side nav a{color:#8A7379;letter-spacing:.08em;}
+body.theme-beauty .side nav a.active{background:rgba(255,255,255,.75);color:#B76E79;border-left-color:#D98A9C;font-weight:500;}
+body.theme-beauty .sec-label{background:none;color:#C9A87C;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:.3em;font-weight:400;padding:14px 20px 4px;margin-top:0;}
+body.theme-beauty .side-user{background:none;color:#8A7379;border-top:1px solid rgba(246,210,218,.8);}
+body.theme-beauty .side-user b{color:#5C4A50;font-family:'Zen Old Mincho',serif;letter-spacing:.1em;}
+body.theme-beauty .side-user button{border-color:#F6D2DA;color:#8A7379;background:rgba(255,255,255,.6);}
+/* 表・章見出し */
+body.theme-beauty th{background:#F6D2DA;color:#7A5560;border-color:#F0C8D3;}
+body.theme-beauty .sec-head{background:linear-gradient(90deg,#FDEEF0,#F6D2DA);color:#7A5560;}
+body.theme-beauty .sec-head .cnt{color:#B76E79;font-family:'Cormorant Garamond',serif;font-style:italic;}
+body.theme-beauty .lesson-row:hover{background:#FFF6F9;}
+/* ボタン・タブは丸く */
+body.theme-beauty .btn{border-radius:999px;letter-spacing:.08em;}
+body.theme-beauty .btn-primary{background:linear-gradient(120deg,#B76E79,#D98A9C);box-shadow:0 8px 20px rgba(183,110,121,.3);}
+body.theme-beauty .btn-gold{background:linear-gradient(120deg,#D98A9C,#C9A87C);box-shadow:0 6px 16px rgba(183,110,121,.25);}
+body.theme-beauty .menu-btn{background:#DE93A8;}
+body.theme-beauty .course-tabs button{border-radius:999px;background:rgba(255,255,255,.7);}
+body.theme-beauty .course-tabs button.on{background:linear-gradient(120deg,#B76E79,#D98A9C);border-color:transparent;box-shadow:0 6px 16px rgba(183,110,121,.3);}
+/* 進捗・状態 */
+body.theme-beauty .pbar{background:#FDEEF0;}
+body.theme-beauty .st-done{background:linear-gradient(145deg,#F2B9C8,#DE93A8);}
+body.theme-beauty .st-watch{background:linear-gradient(145deg,#E4C9A8,#C9A87C);}
+body.theme-beauty .st-none{background:#FDEEF0;color:#D98A9C;}
+body.theme-beauty .b-none{background:#FDF4F7;color:#8A7379;}
+body.theme-beauty .fav{color:#F6D2DA;}
+body.theme-beauty .fav.on{color:#D98A9C;}
+/* ログイン */
+body.theme-beauty .login-wrap{background:
+  radial-gradient(ellipse 700px 500px at 80% 0%, rgba(246,210,218,.7), transparent 60%),
+  linear-gradient(150deg,#FDEEF0,#F6D2DA);}
+body.theme-beauty .login-card{box-shadow:0 14px 40px rgba(183,110,121,.25);}
+body.theme-beauty .proto-note{background:#F6D2DA;color:#8A7379;}
+body.theme-beauty .proto-note b{color:#B76E79;}
+/* 本文フォントも置き換え（*セレクタ対策。個別の明朝/Cormorant指定はより高い詳細度で勝つ） */
+body.theme-beauty *{font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;}

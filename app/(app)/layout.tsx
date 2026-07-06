@@ -12,9 +12,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // テーマ適用
+  // テーマ適用（standard / rose / beauty）
   useEffect(() => {
     document.body.classList.toggle("theme-rose", theme === "rose");
+    document.body.classList.toggle("theme-beauty", theme === "beauty");
   }, [theme]);
 
   // 認証・有効期限ガード（全ページ共通）
@@ -65,8 +66,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <b>{user.name}</b>
           {user.role === "admin" ? "管理者" : "会員"}
           <br />
-          <button onClick={() => setTheme(theme === "rose" ? "standard" : "rose")}>
-            🎨 {theme === "rose" ? "スタンダードに切替" : "ローズテーマに切替"}
+          <button onClick={() => setTheme(theme === "standard" ? "rose" : theme === "rose" ? "beauty" : "standard")}>
+            🎨 {theme === "standard" ? "スタンダード" : theme === "rose" ? "ローズ" : "ビューティ"}（切替）
           </button>
           <button onClick={() => { logout(); router.push("/login"); }}>ログアウト</button>
         </div>
