@@ -36,8 +36,9 @@ export default function LessonsPage() {
 
   return (
     <>
+      <div className="page-en">Course Index</div>
       <div className="page-title">コース目次</div>
-      <div className="page-sub">章をクリックして学習を進めましょう（✓＝完了・♥＝お気に入り）</div>
+      <div className="page-sub">{s.theme === "beauty" ? "気になるレッスンに ♡ をつけて、じぶんのペースで進めましょう。" : "章をクリックして学習を進めましょう（✓＝完了・♥＝お気に入り）"}</div>
 
       {courses.length > 1 && (
         <div className="course-tabs">

@@ -93,6 +93,7 @@ export default function LessonPage() {
 
   return (
     <>
+      <div className="page-en">Lesson</div>
       <div className="page-title">{lesson.title}</div>
       <div className="page-sub">{section?.title}</div>
 

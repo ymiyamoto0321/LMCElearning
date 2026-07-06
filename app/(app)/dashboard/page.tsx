@@ -16,10 +16,12 @@ export default function DashboardPage() {
   const results = s.myQuizResults().slice(0, 3);
   const lessonTitle = (id: string) => s.db.lessons.find(l => l.id === id)?.title ?? "―";
 
+  const beauty = s.theme === "beauty";
   return (
     <>
-      <div className="page-title">ダッシュボード</div>
-      <div className="page-sub">おかえりなさい、{s.user.name}さん。今日も一歩前へ。</div>
+      <div className="page-en">My Dashboard</div>
+      <div className="page-title">{beauty ? "今日も、じぶんを磨くじかん" : "ダッシュボード"}</div>
+      <div className="page-sub">おかえりなさい、{s.user.name}さん。{beauty ? "学びの続きからご案内します。" : "今日も一歩前へ。"}</div>
       <div className="grid2">
         <div className="card" style={{ textAlign: "center" }}>
           <h3>全体達成率</h3>

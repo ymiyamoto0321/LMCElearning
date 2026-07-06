@@ -44,16 +44,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <button className="menu-btn" onClick={() => setMenuOpen(o => !o)}>☰</button>
       <aside className={`side ${menuOpen ? "open" : ""}`}>
         <div className="side-brand">
-          <LogoMark size={34} />
-          <b>LMC <span>e-learning</span></b>
+          {/* ビューティテーマ時は丸エンブレム＋Beauty Edition（CSSで出し分け） */}
+          <div className="emblem">LMC</div>
+          <div className="bname">LMC e-learning</div>
+          <div className="ben">Beauty Edition</div>
+          <span className="brand-default">
+            <LogoMark size={34} />
+            <b>LMC <span>e-learning</span></b>
+          </span>
         </div>
         <nav>
-          <div className="sec-label">学習</div>
+          <div className="sec-label">{theme === "beauty" ? "Learning" : "学習"}</div>
           {nav("/dashboard", "ダッシュボード")}
           {nav("/lessons", "コース目次")}
           {user.role === "admin" && (
             <>
-              <div className="sec-label">管理</div>
+              <div className="sec-label">{theme === "beauty" ? "Admin" : "管理"}</div>
               {nav("/admin/lessons", "レッスン管理")}
               {nav("/admin/questions", "問題管理")}
               {nav("/admin/plans", "プラン・コース管理")}
@@ -63,7 +69,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           )}
         </nav>
         <div className="side-user">
-          <b>{user.name}</b>
+          <b>{user.name}{theme === "beauty" ? " さま" : ""}</b>
           {user.role === "admin" ? "管理者" : "会員"}
           <br />
           <button onClick={() => setTheme(theme === "standard" ? "rose" : theme === "rose" ? "beauty" : "standard")}>
@@ -72,7 +78,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => { logout(); router.push("/login"); }}>ログアウト</button>
         </div>
       </aside>
-      <main className="main">{children}</main>
+      <main className="main">
+        {children}
+        <div className="beauty-footer">
+          <div className="lmc">L M C</div>
+          <div className="co">LIFE MANAGEMENT COMPANY</div>
+        </div>
+      </main>
     </div>
   );
 }

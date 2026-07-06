@@ -79,6 +79,7 @@ export default function QuizPage() {
 
   return (
     <>
+      <div className="page-en">Quiz</div>
       <div className="page-title">{graded ? "テスト結果" : "確認テスト"}：{lesson.title}</div>
       <div className="page-sub">全{items.length}問中 {PASS_LINE}問正解で合格。不合格でも何度でも再挑戦できます。</div>
 

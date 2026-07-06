@@ -219,3 +219,40 @@ body.theme-beauty .proto-note{background:#F6D2DA;color:#8A7379;}
 body.theme-beauty .proto-note b{color:#B76E79;}
 /* 本文フォントも置き換え（*セレクタ対策。個別の明朝/Cormorant指定はより高い詳細度で勝つ） */
 body.theme-beauty *{font-family:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN',sans-serif;}
+
+/* ===== ビューティテーマ: デモHTML準拠の装飾要素 ===== */
+/* 丸エンブレム（ゴールドリング付き）＋ Beauty Edition ブランド */
+body.theme-beauty .side-brand{display:block;text-align:center;padding:24px 18px 18px;}
+.emblem{display:none;}
+body.theme-beauty .emblem{
+  display:flex;width:58px;height:58px;border-radius:50%;margin:0 auto 10px;position:relative;
+  background:linear-gradient(145deg,#F2B9C8,#DE93A8);
+  align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:#fff;letter-spacing:.06em;
+  box-shadow:0 8px 20px rgba(183,110,121,.3), inset 0 2px 5px rgba(255,255,255,.55);
+}
+body.theme-beauty .emblem::after{content:'';position:absolute;inset:-5px;border-radius:50%;border:1px solid rgba(201,168,124,.55);}
+.bname,.ben{display:none;}
+body.theme-beauty .bname{display:block;font-family:'Zen Old Mincho',serif;font-size:15px;letter-spacing:.2em;color:#5C4A50;font-weight:600;}
+body.theme-beauty .ben{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;letter-spacing:.24em;color:#C9A87C;margin-top:2px;}
+body.theme-beauty .brand-default{display:none;}
+
+/* 英字eyebrow（MY DASHBOARD等）と♡仕切り */
+.page-en{display:none;}
+body.theme-beauty .page-en{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;letter-spacing:.3em;color:#C9A87C;text-transform:uppercase;}
+body.theme-beauty .page-sub::after{
+  content:"♡";display:block;color:#D98A9C;font-size:11px;margin-top:10px;padding-left:76px;line-height:1;
+  background:linear-gradient(90deg,#F6D2DA,transparent);
+  background-size:64px 1px;background-repeat:no-repeat;background-position:0 55%;
+}
+
+/* 状態アイコン: 完了にゴールドの細リング */
+.st{position:relative;}
+body.theme-beauty .st-done::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(201,168,124,.5);}
+
+/* フッター（L M C / LIFE MANAGEMENT COMPANY） */
+.beauty-footer{display:none;}
+body.theme-beauty .beauty-footer{display:block;text-align:center;padding:36px 0 8px;color:#8A7379;}
+body.theme-beauty .beauty-footer .lmc{font-family:'Cormorant Garamond',serif;font-size:15px;letter-spacing:.34em;color:#B76E79;}
+body.theme-beauty .beauty-footer .co{font-size:10.5px;letter-spacing:.2em;margin-top:4px;}
+.brand-default{display:flex;align-items:center;gap:10px;}
